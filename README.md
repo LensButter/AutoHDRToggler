@@ -17,6 +17,9 @@ Existing tools like *Quick HDR* only support the primary monitor.
 - Left-click tray icon → opens the monitor panel
 - Right-click tray icon → opens a compact quick-access menu
 
+## Fork
+- automatically enables HDR by selected process
+
 ## Requirements
 
 - Windows 10 (version 1803+) or Windows 11
