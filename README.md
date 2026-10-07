@@ -36,7 +36,8 @@ Run `HDRToggler.exe`. The monitor panel opens immediately on launch.
 | Left-click tray icon | Opens the monitor panel |
 | Click a monitor box | Toggles HDR on that display |
 | Right-click tray icon | Opens the quick-access menu |
-| Automatic HDR... (quick-access menu) | Opens the main window's Auto-HDR settings |
+| Automatic HDR switch (quick-access menu) | Enables or disables process-based HDR |
+| Settings (quick-access menu) | Opens the main window and its Auto-HDR settings |
 | Exit (from menu) | Closes the app |
 
 ## Automatic HDR

@@ -37,6 +37,7 @@ public sealed class AutoHdrService : IDisposable
     public IReadOnlyList<AutoHdrRule> Rules => _rules;
     public bool IsEnabled => _enabled;
     public event Action<string>? ErrorOccurred;
+    public event Action<bool>? EnabledChanged;
     public string? ShutdownError { get; private set; }
 
     public AutoHdrService(bool loadRules = true)
@@ -54,6 +55,7 @@ public sealed class AutoHdrService : IDisposable
         SaveEnabledSetting(enabled);
         _enabled = enabled;
         UpdateRules();
+        EnabledChanged?.Invoke(enabled);
     }
 
     public void AddRule(string processName, HdrMonitor monitor)

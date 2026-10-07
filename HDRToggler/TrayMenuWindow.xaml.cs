@@ -1,25 +1,36 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
+using MessageBox = System.Windows.MessageBox;
 
 namespace HDRToggler;
 
 public partial class TrayMenuWindow : Window
 {
-    private readonly Action _onOpenAutoHdr;
+    private readonly AutoHdrService _autoHdrService;
+    private readonly Action _onOpenSettings;
     private readonly Action _onExit;
     private List<HdrMonitor> _monitors;
     private bool _closing;
 
-    public TrayMenuWindow(Action onOpenAutoHdr, Action onExit)
+    public TrayMenuWindow(AutoHdrService autoHdrService, Action onOpenSettings, Action onExit)
     {
         InitializeComponent();
-        _onOpenAutoHdr = onOpenAutoHdr;
+        _autoHdrService = autoHdrService;
+        _onOpenSettings = onOpenSettings;
         _onExit = onExit;
+        UpdateAutoHdrStatus(_autoHdrService.IsEnabled);
         _monitors = HdrService.GetMonitors();
         MonitorList.ItemsSource = _monitors;
 
+        _autoHdrService.EnabledChanged += OnAutoHdrEnabledChanged;
         HdrService.StateChanged += OnExternalStateChanged;
-        Closed += (_, _) => HdrService.StateChanged -= OnExternalStateChanged;
+        Closed += (_, _) =>
+        {
+            HdrService.StateChanged -= OnExternalStateChanged;
+            _autoHdrService.EnabledChanged -= OnAutoHdrEnabledChanged;
+        };
     }
 
     // Called when another window triggers a toggle — re-query from Windows
@@ -94,6 +105,8 @@ public partial class TrayMenuWindow : Window
 
     private void ExitItem_Click(object sender, MouseButtonEventArgs e)
     {
+        e.Handled = true;
+        if (_closing) return;
         _closing = true;
         Close();
         _onExit();
@@ -101,13 +114,72 @@ public partial class TrayMenuWindow : Window
 
     private void AutoHdrItem_Click(object sender, MouseButtonEventArgs e)
     {
+        e.Handled = true;
+        if (_closing) return;
+
+        try
+        {
+            _autoHdrService.SetEnabled(!_autoHdrService.IsEnabled);
+            UpdateAutoHdrStatus(_autoHdrService.IsEnabled);
+        }
+        catch (IOException ex)
+        {
+            ShowAutoHdrToggleError(ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            ShowAutoHdrToggleError(ex.Message);
+        }
+    }
+
+    private void SettingsItem_Click(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        if (_closing) return;
+        _closing = true;
         Close();
-        _onOpenAutoHdr();
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, _onOpenSettings);
+    }
+
+    private void ShowAutoHdrToggleError(string detail)
+    {
+        UpdateAutoHdrStatus(_autoHdrService.IsEnabled);
+        MessageBox.Show(this, $"Automatic HDR settings could not be saved:\n\n{detail}",
+            "HDR Toggler", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    private void OnAutoHdrEnabledChanged(bool enabled)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(() => OnAutoHdrEnabledChanged(enabled));
+            return;
+        }
+
+        UpdateAutoHdrStatus(enabled);
+    }
+
+    private void UpdateAutoHdrStatus(bool enabled)
+    {
+        AutoHdrStatusText.Text = enabled ? "ON" : "OFF";
+        AutoHdrStatusText.Foreground = enabled
+            ? new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Color.FromRgb(0x00, 0xFF, 0x87))
+            : new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Color.FromRgb(0x66, 0x66, 0x66));
+        AutoHdrStatusBadge.Background = enabled
+            ? new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Color.FromArgb(0x26, 0x00, 0xFF, 0x87))
+            : new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Color.FromArgb(0x33, 0xFF, 0xFF, 0xFF));
     }
 
     private void Window_Deactivated(object sender, EventArgs e)
     {
         if (!_closing)
+        {
+            _closing = true;
             Close();
+        }
     }
 }

@@ -56,7 +56,7 @@ public partial class App : System.Windows.Application
         }
         else if (e.Button == MouseButtons.Right)
         {
-            var menu = new TrayMenuWindow(OpenMainWindow, DoExit);
+            var menu = new TrayMenuWindow(_autoHdrService!, OpenMainWindow, DoExit);
             menu.ShowNearCursor();
         }
     }
@@ -69,9 +69,15 @@ public partial class App : System.Windows.Application
             return;
         }
 
-        _mainWindow = new MainWindow(HdrService.GetMonitors(), _autoHdrService!);
-        _mainWindow.Show();
-        _mainWindow.Activate();
+        var window = new MainWindow(HdrService.GetMonitors(), _autoHdrService!);
+        _mainWindow = window;
+        window.Closed += (_, _) =>
+        {
+            if (ReferenceEquals(_mainWindow, window))
+                _mainWindow = null;
+        };
+        window.Show();
+        window.Activate();
     }
 
     private void DoExit()

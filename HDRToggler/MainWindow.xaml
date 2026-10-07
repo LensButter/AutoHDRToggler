@@ -5,9 +5,228 @@
         AllowsTransparency="True"
         Background="Transparent"
         ResizeMode="NoResize"
-        SizeToContent="WidthAndHeight"
+        Width="760"
+        Height="560"
         WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI Variable Display, Segoe UI, sans-serif">
+
+    <Window.Resources>
+        <Style x:Key="AutoHdrButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="#D8FFFFFF"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Width" Value="88"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="6,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="#1FFFFFFF"/>
+            <Setter Property="BorderBrush" Value="#24FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#2AFFFFFF"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#4000FF87"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#3300FF87"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="AutoHdrWideButtonStyle" TargetType="Button"
+               BasedOn="{StaticResource AutoHdrButtonStyle}">
+            <Setter Property="Width" Value="154"/>
+        </Style>
+        <Style x:Key="AutoHdrInputStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="#E0FFFFFF"/>
+            <Setter Property="CaretBrush" Value="#00FF87"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="9,0"/>
+            <Setter Property="Background" Value="#171717"/>
+            <Setter Property="BorderBrush" Value="#303030"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style x:Key="AutoHdrComboStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="#E0FFFFFF"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="Background" Value="#171717"/>
+            <Setter Property="BorderBrush" Value="#303030"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="ComboBorder" Grid.ColumnSpan="2"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="26"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Grid.Column="0" Margin="{TemplateBinding Padding}"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}"/>
+                                <ToggleButton Grid.Column="1"
+                                              IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                              Focusable="False" Background="Transparent"
+                                              BorderThickness="0">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="Transparent">
+                                                <Path Data="M 0 0 L 4 4 L 8 0"
+                                                      Stroke="#999999" StrokeThickness="1.4"
+                                                      Width="8" Height="4"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+                            </Grid>
+                            <Popup x:Name="PART_Popup" Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False"
+                                   PopupAnimation="Fade">
+                                <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                        MaxHeight="260" Background="#171717"
+                                        BorderBrush="#303030" BorderThickness="1"
+                                        CornerRadius="6" Padding="3">
+                                    <ScrollViewer CanContentScroll="True">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ComboBorder" Property="BorderBrush" Value="#505050"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="ComboBorder" Property="BorderBrush" Value="#00B969"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ComboBorder" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Foreground" Value="#E0FFFFFF"/>
+                        <Setter Property="Background" Value="#171717"/>
+                        <Setter Property="Padding" Value="8,6"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter Property="Background" Value="#303030"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#263A2F"/>
+                                <Setter Property="Foreground" Value="#00FF87"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="AutoHdrToggleStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#AAAAAA"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <DockPanel LastChildFill="False">
+                            <ContentPresenter VerticalAlignment="Center" Margin="0,0,9,0"/>
+                            <Grid DockPanel.Dock="Right" Width="38" Height="21">
+                                <Border x:Name="Track" Background="#333333" CornerRadius="11"/>
+                                <Ellipse x:Name="Knob" Width="15" Height="15" Margin="3"
+                                         Fill="#888888" HorizontalAlignment="Left"/>
+                            </Grid>
+                        </DockPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Track" Property="Background" Value="#00B969"/>
+                                <Setter TargetName="Knob" Property="Fill" Value="#FFFFFF"/>
+                                <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="AutoHdrRuleListStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="#121212"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="BorderBrush" Value="#262626"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Foreground" Value="#CCCCCC"/>
+                        <Setter Property="Padding" Value="7,5"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border x:Name="ItemBorder" Background="Transparent"
+                                            CornerRadius="5" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="#14FFFFFF"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="#2600FF87"/>
+                                            <Setter Property="Foreground" Value="#00FF87"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <DataTemplate x:Key="RunningProcessItemTemplate">
+            <TextBlock Text="{Binding WindowTitle}" TextTrimming="CharacterEllipsis"
+                       Foreground="#E0FFFFFF" VerticalAlignment="Center"/>
+        </DataTemplate>
+        <DataTemplate x:Key="MonitorItemTemplate">
+            <TextBlock Text="{Binding FriendlyName}" TextTrimming="CharacterEllipsis"
+                       Foreground="#E0FFFFFF" VerticalAlignment="Center"/>
+        </DataTemplate>
+    </Window.Resources>
 
     <Border x:Name="Root" CornerRadius="16" Padding="24"
             MouseDown="Root_MouseDown">
@@ -24,7 +243,8 @@
             <!-- Title bar -->
             <Grid Margin="0,0,0,20">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Ellipse Width="7" Height="7" Fill="#444444" Margin="0,0,8,0"/>
+                    <Ellipse x:Name="HeaderStatusDot" Width="7" Height="7"
+                             Fill="#444444" Margin="0,0,8,0"/>
                     <TextBlock Text="HDR TOGGLER"
                                Foreground="#666666" FontSize="10" FontWeight="SemiBold"
                                VerticalAlignment="Center"/>
@@ -101,20 +321,34 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <Border Margin="0,18,0,0" Padding="14" CornerRadius="10"
-                    Background="#14FFFFFF" BorderBrush="#22FFFFFF" BorderThickness="1">
+            <Border Margin="0,20,0,0" Padding="16" CornerRadius="12"
+                    Background="#101010" BorderBrush="#252525" BorderThickness="1">
                 <StackPanel>
-                    <DockPanel Margin="0,0,0,12">
-                        <TextBlock Text="AUTOMATIC HDR" Foreground="#00FF87"
-                                   FontSize="10" FontWeight="SemiBold"
-                                   VerticalAlignment="Center"/>
-                        <CheckBox x:Name="AutoHdrEnabledBox" DockPanel.Dock="Right"
-                                  Content="Enabled" Foreground="#CCCCCC"
-                                  Checked="AutoHdrEnabled_Changed"
-                                  Unchecked="AutoHdrEnabled_Changed"/>
-                    </DockPanel>
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="AUTOMATIC HDR" Foreground="#00FF87"
+                                       FontSize="10" FontWeight="SemiBold"/>
+                            <TextBlock Text="Process-based display profiles"
+                                       Foreground="#777777" FontSize="10" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBlock x:Name="AutoHdrStateText" Text="OFF"
+                                       Foreground="#777777" FontSize="10"
+                                       FontWeight="SemiBold" Margin="0,0,9,0"
+                                       VerticalAlignment="Center"/>
+                            <CheckBox x:Name="AutoHdrEnabledBox"
+                                      Style="{StaticResource AutoHdrToggleStyle}"
+                                      Checked="AutoHdrEnabled_Changed"
+                                      Unchecked="AutoHdrEnabled_Changed"/>
+                        </StackPanel>
+                    </Grid>
                     <TextBlock Text="Choose a running process or browse to its EXE file."
-                               Foreground="#999999" FontSize="11" TextWrapping="Wrap"
+                               Foreground="#888888" FontSize="10" TextWrapping="Wrap"
                                Margin="0,0,0,10"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -122,11 +356,12 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox x:Name="ProcessNameBox" Grid.Column="0" Height="32"
-                                 VerticalContentAlignment="Center" Padding="8,0"
-                                 Background="#202020" Foreground="#E0FFFFFF"
-                                 BorderBrush="#383838" ToolTip="Executable name, e.g. game.exe"/>
+                                 VerticalContentAlignment="Center"
+                                 Style="{StaticResource AutoHdrInputStyle}"
+                                 ToolTip="Executable name, e.g. game.exe"/>
                         <Button Grid.Column="1" Content="Browse..." Margin="8,0,0,0"
-                                Padding="10,0" Click="BrowseProcess_Click"/>
+                                Style="{StaticResource AutoHdrButtonStyle}"
+                                Click="BrowseProcess_Click"/>
                     </Grid>
                     <Grid Margin="0,8,0,0">
                         <Grid.ColumnDefinitions>
@@ -135,12 +370,16 @@
                         </Grid.ColumnDefinitions>
                         <ComboBox x:Name="RunningProcessBox" Grid.Column="0" Height="32"
                                   VerticalContentAlignment="Center"
-                                  DisplayMemberPath="DisplayName"
+                                  Style="{StaticResource AutoHdrComboStyle}"
+                                  ItemTemplate="{StaticResource RunningProcessItemTemplate}"
                                   SelectionChanged="RunningProcess_SelectionChanged"
                                   ToolTip="Select a currently running process"/>
                         <Button Grid.Column="1" Content="Refresh" Margin="8,0,0,0"
-                                Padding="10,0" Click="RefreshProcesses_Click"/>
+                                Style="{StaticResource AutoHdrButtonStyle}"
+                                Click="RefreshProcesses_Click"/>
                     </Grid>
+                    <TextBlock x:Name="ProcessListStatus" Foreground="#777777"
+                               FontSize="9" Margin="2,5,0,0"/>
                     <Grid Margin="0,8,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -148,19 +387,21 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Monitor" Foreground="#999999"
-                                   VerticalAlignment="Center" FontSize="11"/>
+                                   VerticalAlignment="Center" FontSize="10"/>
                         <ComboBox x:Name="AutoHdrMonitorBox" Grid.Column="1" Height="32"
                                   VerticalContentAlignment="Center"
-                                  DisplayMemberPath="FriendlyName"/>
+                                  Style="{StaticResource AutoHdrComboStyle}"
+                                  ItemTemplate="{StaticResource MonitorItemTemplate}"/>
                         <Button Grid.Column="2" Content="Add rule" Margin="8,0,0,0"
-                                Padding="10,0" Click="AddAutoHdrRule_Click"/>
+                                Style="{StaticResource AutoHdrButtonStyle}"
+                                Click="AddAutoHdrRule_Click"/>
                     </Grid>
                     <ListBox x:Name="AutoHdrRuleList" Height="72" Margin="0,10,0,0"
-                             Background="#202020" Foreground="#CCCCCC"
-                             BorderBrush="#383838" Padding="4"
+                             Style="{StaticResource AutoHdrRuleListStyle}"
                              DisplayMemberPath="DisplayName"/>
                     <Button Content="Remove selected rule" HorizontalAlignment="Right"
-                            Margin="0,8,0,0" Padding="10,5"
+                            Margin="0,8,0,0"
+                            Style="{StaticResource AutoHdrWideButtonStyle}"
                             Click="RemoveAutoHdrRule_Click"/>
                 </StackPanel>
             </Border>

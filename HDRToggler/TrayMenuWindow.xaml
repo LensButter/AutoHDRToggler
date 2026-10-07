@@ -81,7 +81,7 @@
             <!-- Separator -->
             <Border Height="1" Background="#1AFFFFFF" Margin="8,4"/>
 
-            <!-- Automatic HDR rules -->
+            <!-- Automatic HDR toggle -->
             <Border CornerRadius="8" Padding="12,10"
                     Cursor="Hand" MouseLeftButtonDown="AutoHdrItem_Click">
                 <Border.Style>
@@ -94,7 +94,40 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <TextBlock Text="Automatic HDR..." Foreground="#CCFFFFFF" FontSize="13"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Automatic HDR"
+                               Foreground="#CCFFFFFF" FontSize="13"
+                               VerticalAlignment="Center"/>
+                    <Border x:Name="AutoHdrStatusBadge" Grid.Column="1"
+                            CornerRadius="4" Padding="6,2" Margin="12,0,0,0">
+                        <Border.Background>
+                            <SolidColorBrush Color="#FFFFFF" Opacity="0.20"/>
+                        </Border.Background>
+                        <TextBlock x:Name="AutoHdrStatusText" FontSize="10" FontWeight="SemiBold"
+                                   Text="OFF" Foreground="#666666"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Settings -->
+            <Border CornerRadius="8" Padding="12,10"
+                    Cursor="Hand" MouseLeftButtonDown="SettingsItem_Click">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1AFFFFFF"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="Settings" Foreground="#CCFFFFFF" FontSize="13"/>
             </Border>
 
             <!-- Exit -->

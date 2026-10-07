@@ -6,12 +6,7 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace HDRToggler;
 
-public sealed record RunningProcessOption(string ProcessName, int ProcessId, string WindowTitle)
-{
-    public string DisplayName => string.IsNullOrWhiteSpace(WindowTitle)
-        ? $"{ProcessName}.exe (PID {ProcessId})"
-        : $"{ProcessName}.exe — {WindowTitle} (PID {ProcessId})";
-}
+public sealed record RunningProcessOption(string ProcessName, int ProcessId, string WindowTitle);
 
 public partial class MainWindow : Window
 {
@@ -29,11 +24,17 @@ public partial class MainWindow : Window
         if (_monitors.Count > 0)
             AutoHdrMonitorBox.SelectedIndex = 0;
         AutoHdrEnabledBox.IsChecked = _autoHdrService.IsEnabled;
+        UpdateAutoHdrIndicators();
         RefreshAutoHdrRules();
         RefreshRunningProcesses();
 
+        _autoHdrService.EnabledChanged += OnAutoHdrEnabledChanged;
         HdrService.StateChanged += OnExternalStateChanged;
-        Closed += (_, _) => HdrService.StateChanged -= OnExternalStateChanged;
+        Closed += (_, _) =>
+        {
+            HdrService.StateChanged -= OnExternalStateChanged;
+            _autoHdrService.EnabledChanged -= OnAutoHdrEnabledChanged;
+        };
     }
 
     // Called when another window triggers a toggle — re-query from Windows
@@ -77,6 +78,7 @@ public partial class MainWindow : Window
         try
         {
             _autoHdrService.SetEnabled(AutoHdrEnabledBox.IsChecked == true);
+            UpdateAutoHdrIndicators();
         }
         catch (IOException ex)
         {
@@ -86,6 +88,20 @@ public partial class MainWindow : Window
         {
             ShowAutoHdrSettingsError(ex.Message);
         }
+    }
+
+    private void OnAutoHdrEnabledChanged(bool isEnabled)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(() => OnAutoHdrEnabledChanged(isEnabled));
+            return;
+        }
+
+        _updatingAutoHdrCheckbox = true;
+        AutoHdrEnabledBox.IsChecked = isEnabled;
+        _updatingAutoHdrCheckbox = false;
+        UpdateAutoHdrIndicators();
     }
 
     private void AddAutoHdrRule_Click(object sender, RoutedEventArgs e)
@@ -151,17 +167,34 @@ public partial class MainWindow : Window
     {
         var selectedProcess = RunningProcessBox.SelectedItem as RunningProcessOption;
         var processes = new List<RunningProcessOption>();
+        Process[] runningProcesses;
 
-        foreach (var process in Process.GetProcesses())
+        try
+        {
+            runningProcesses = Process.GetProcesses();
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            RunningProcessBox.ItemsSource = Array.Empty<RunningProcessOption>();
+            ProcessListStatus.Text = $"Could not read the process list: {ex.Message}";
+            ProcessListStatus.Foreground = System.Windows.Media.Brushes.OrangeRed;
+            return;
+        }
+
+        foreach (var process in runningProcesses)
         {
             using (process)
             {
                 try
                 {
+                    var windowTitle = process.MainWindowTitle;
+                    if (string.IsNullOrWhiteSpace(windowTitle))
+                        continue;
+
                     processes.Add(new RunningProcessOption(
                         process.ProcessName,
                         process.Id,
-                        process.MainWindowTitle));
+                        windowTitle));
                 }
                 catch (InvalidOperationException)
                 {
@@ -174,14 +207,20 @@ public partial class MainWindow : Window
             }
         }
 
-        RunningProcessBox.ItemsSource = processes
+        var sortedProcesses = processes
             .OrderBy(process => process.ProcessName, StringComparer.OrdinalIgnoreCase)
             .ThenBy(process => process.ProcessId)
             .ToList();
+        RunningProcessBox.ItemsSource = sortedProcesses;
+        ProcessListStatus.Text = sortedProcesses.Count == 0
+            ? "No running processes found."
+            : $"{sortedProcesses.Count} running processes";
+        ProcessListStatus.Foreground = new System.Windows.Media.SolidColorBrush(
+            System.Windows.Media.Color.FromRgb(0x77, 0x77, 0x77));
 
         if (selectedProcess is not null)
         {
-            RunningProcessBox.SelectedItem = processes.FirstOrDefault(process =>
+            RunningProcessBox.SelectedItem = sortedProcesses.FirstOrDefault(process =>
                 process.ProcessId == selectedProcess.ProcessId);
         }
     }
@@ -213,8 +252,24 @@ public partial class MainWindow : Window
         _updatingAutoHdrCheckbox = true;
         AutoHdrEnabledBox.IsChecked = _autoHdrService.IsEnabled;
         _updatingAutoHdrCheckbox = false;
+        UpdateAutoHdrIndicators();
         MessageBox.Show(this, $"Automatic HDR settings could not be saved:\n\n{detail}",
             "HDR Toggler", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    private void UpdateAutoHdrIndicators()
+    {
+        var isEnabled = _autoHdrService.IsEnabled;
+        HeaderStatusDot.Fill = new System.Windows.Media.SolidColorBrush(
+            isEnabled
+                ? System.Windows.Media.Color.FromRgb(0x00, 0xFF, 0x87)
+                : System.Windows.Media.Color.FromRgb(0x44, 0x44, 0x44));
+        AutoHdrStateText.Text = isEnabled ? "ON" : "OFF";
+        AutoHdrStateText.Foreground = isEnabled
+            ? new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Color.FromRgb(0x00, 0xFF, 0x87))
+            : new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Color.FromRgb(0x77, 0x77, 0x77));
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
