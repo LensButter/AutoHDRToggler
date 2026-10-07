@@ -81,6 +81,22 @@
             <!-- Separator -->
             <Border Height="1" Background="#1AFFFFFF" Margin="8,4"/>
 
+            <!-- Automatic HDR rules -->
+            <Border CornerRadius="8" Padding="12,10"
+                    Cursor="Hand" MouseLeftButtonDown="AutoHdrItem_Click">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1AFFFFFF"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="Automatic HDR..." Foreground="#CCFFFFFF" FontSize="13"/>
+            </Border>
+
             <!-- Exit -->
             <Border x:Name="ExitRow" CornerRadius="8" Padding="12,10"
                     Cursor="Hand" MouseLeftButtonDown="ExitItem_Click">

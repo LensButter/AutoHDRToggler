@@ -5,13 +5,15 @@ namespace HDRToggler;
 
 public partial class TrayMenuWindow : Window
 {
+    private readonly Action _onOpenAutoHdr;
     private readonly Action _onExit;
     private List<HdrMonitor> _monitors;
     private bool _closing;
 
-    public TrayMenuWindow(Action onExit)
+    public TrayMenuWindow(Action onOpenAutoHdr, Action onExit)
     {
         InitializeComponent();
+        _onOpenAutoHdr = onOpenAutoHdr;
         _onExit = onExit;
         _monitors = HdrService.GetMonitors();
         MonitorList.ItemsSource = _monitors;
@@ -95,6 +97,12 @@ public partial class TrayMenuWindow : Window
         _closing = true;
         Close();
         _onExit();
+    }
+
+    private void AutoHdrItem_Click(object sender, MouseButtonEventArgs e)
+    {
+        Close();
+        _onOpenAutoHdr();
     }
 
     private void Window_Deactivated(object sender, EventArgs e)

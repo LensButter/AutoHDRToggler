@@ -13,6 +13,7 @@ Existing tools like *Quick HDR* only support the primary monitor.
 - Sits quietly in the system tray
 - Detects all HDR-capable monitors on your system
 - Lets you toggle HDR independently on each display with a single click
+- Can enable HDR on a selected display while configured processes are running
 - Left-click tray icon → opens the monitor panel
 - Right-click tray icon → opens a compact quick-access menu
 
@@ -32,7 +33,14 @@ Run `HDRToggler.exe`. The monitor panel opens immediately on launch.
 | Left-click tray icon | Opens the monitor panel |
 | Click a monitor box | Toggles HDR on that display |
 | Right-click tray icon | Opens the quick-access menu |
+| Automatic HDR... (quick-access menu) | Opens the main window's Auto-HDR settings |
 | Exit (from menu) | Closes the app |
+
+## Automatic HDR
+
+Use the **Automatic HDR** section in the main window to enable the feature, add a rule, or remove a selected rule. Enter an executable name (for example, `game.exe` or `Minecraft.Windows`), select a running process, or use **Browse...** to choose an EXE file. Then select the HDR-capable display. The process list can be updated with **Refresh**. HDR is enabled while at least one configured process with that executable name is running. When the last matching process closes, HDR returns to the state it had before the automatic activation. If multiple rules target the same display, HDR is restored only after all matching processes have closed.
+
+Rules are stored in `%LOCALAPPDATA%\HDRToggler\auto-hdr-rules.json`, and the enabled/disabled setting in `%LOCALAPPDATA%\HDRToggler\auto-hdr-enabled.json`. Processes are checked every two seconds. Closing HDR Toggler also restores any HDR state it changed.
 
 ## Stack
 
